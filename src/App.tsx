@@ -6,11 +6,9 @@ function App() {
         <p>Calculateur de prêt immobilier</p>
       </header>
 
-      <main>
-        It's coming soon!
-      </main>
+      <main>It's coming soon!</main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

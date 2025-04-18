@@ -31,7 +31,7 @@ interface LoanOutput {
 // TODO: use cents and round to 2 decimals
 
 export function computeCost(inputs: LoanInput): LoanOutput {
-  const { monthlyInstallmentWithoutInsurance, totalInterests } = computeInterestCost(inputs)
+  const { monthlyInstallmentWithoutInsurance, totalInterests } = computeInterestCost(inputs);
   return {
     monthlyInstallmentWithoutInsurance,
     fullInstallment: 0,
@@ -40,10 +40,10 @@ export function computeCost(inputs: LoanInput): LoanOutput {
     totalCost: inputs.initialFees + totalInterests + inputs.insuranceCost,
     effectiveAnnualRate: 0,
     effectiveInsuranceAnnualRate: 0,
-  }
+  };
 }
 
-function computeInterestCost({ annualRate, months, principal }: { annualRate: number; months: number; principal: number; }): {
+function computeInterestCost({ annualRate, months, principal }: { annualRate: number; months: number; principal: number }): {
   monthlyInstallmentWithoutInsurance: number;
   totalInterests: number;
 } {
@@ -56,14 +56,13 @@ function computeInterestCost({ annualRate, months, principal }: { annualRate: nu
     return {
       monthlyInstallmentWithoutInsurance: principal / months,
       totalInterests: 0,
-    }
+    };
   }
 
-  const compoundFactor = Math.pow(1 + monthlyRate, months);
-  const monthlyInstallmentWithoutInsurance =
-    (principal * monthlyRate * compoundFactor) / (compoundFactor - 1);
+  const compoundFactor = (1 + monthlyRate) ** months;
+  const monthlyInstallmentWithoutInsurance = (principal * monthlyRate * compoundFactor) / (compoundFactor - 1);
   return {
     monthlyInstallmentWithoutInsurance,
     totalInterests: monthlyInstallmentWithoutInsurance * months - principal,
-  }
+  };
 }
