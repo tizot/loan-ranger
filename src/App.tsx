@@ -74,7 +74,8 @@ function App() {
   const validation = () => v.safeParse(schema, inputs);
   const [result, setResult] = createStore<{ output: LoanOutput | null }>(getResult(validation()));
 
-  const handleOnClick = () => {
+  const handleOnSubmit = (e: SubmitEvent) => {
+    e.preventDefault();
     const parsed = validation();
     if (!parsed.success) {
       setResult({ output: null });
@@ -102,40 +103,42 @@ function App() {
           <CardHeader>
             <CardTitle>Informations sur le prêt</CardTitle>
           </CardHeader>
-          <CardContent class="flex flex-col gap-2 w-full max-w-md">
-            <NumberInput
-              rawValue={inputs.principal}
-              onRawValueChange={(value) => setInputs('principal', value)}
-              label="Montant emprunté (principal)"
-              errorMessage="Le principal doit être un nombre positif."
-            />
-            <NumberInput
-              rawValue={inputs.annualRatePercentage}
-              onRawValueChange={(value) => setInputs('annualRatePercentage', value)}
-              label="Taux d'intérêt annuel (%)"
-              errorMessage="Le taux d'intérêt doit être un nombre entre 0 et 100."
-            />
-            <NumberInput
-              rawValue={inputs.months}
-              onRawValueChange={(value) => setInputs('months', value)}
-              label="Durée du prêt (mois)"
-              errorMessage="La durée doit être un nombre entier positif."
-            />
-            <NumberInput
-              rawValue={inputs.initialFees}
-              onRawValueChange={(value) => setInputs('initialFees', value)}
-              label="Frais de dossier initiaux"
-              errorMessage="Les frais doivent être un nombre positif."
-            />
-            <NumberInput
-              rawValue={inputs.insuranceCost}
-              onRawValueChange={(value) => setInputs('insuranceCost', value)}
-              label="Coût de l'assurance"
-              errorMessage="Le coût doit être un nombre positif."
-            />
-            <Button type="button" onClick={handleOnClick} disabled={!validation().success}>
-              Calculer
-            </Button>
+          <CardContent>
+            <form onSubmit={handleOnSubmit} class="flex flex-col gap-2 w-full max-w-md">
+              <NumberInput
+                rawValue={inputs.principal}
+                onRawValueChange={(value) => setInputs('principal', value)}
+                label="Montant emprunté (principal)"
+                errorMessage="Le principal doit être un nombre positif."
+              />
+              <NumberInput
+                rawValue={inputs.annualRatePercentage}
+                onRawValueChange={(value) => setInputs('annualRatePercentage', value)}
+                label="Taux d'intérêt annuel (%)"
+                errorMessage="Le taux d'intérêt doit être un nombre entre 0 et 100."
+              />
+              <NumberInput
+                rawValue={inputs.months}
+                onRawValueChange={(value) => setInputs('months', value)}
+                label="Durée du prêt (mois)"
+                errorMessage="La durée doit être un nombre entier positif."
+              />
+              <NumberInput
+                rawValue={inputs.initialFees}
+                onRawValueChange={(value) => setInputs('initialFees', value)}
+                label="Frais de dossier initiaux"
+                errorMessage="Les frais doivent être un nombre positif."
+              />
+              <NumberInput
+                rawValue={inputs.insuranceCost}
+                onRawValueChange={(value) => setInputs('insuranceCost', value)}
+                label="Coût de l'assurance"
+                errorMessage="Le coût doit être un nombre positif."
+              />
+              <Button type="submit" disabled={!validation().success} class="mt-2">
+                Calculer
+              </Button>
+            </form>
           </CardContent>
         </Card>
 
