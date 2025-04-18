@@ -1,3 +1,5 @@
+import type { NumberFieldRootProps } from '@kobalte/core/number-field';
+import { Show, splitProps } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import * as v from 'valibot';
 import { Button } from './components/ui/button';
@@ -10,19 +12,17 @@ import {
   NumberFieldLabel,
 } from './components/ui/number-field';
 import { type LoanOutput, computeCost } from './lib/calculator';
-import { Show, splitProps } from 'solid-js';
-import type { NumberFieldRootProps } from '@kobalte/core/number-field';
 
-const InputSchema = v.object({
+const schema = v.object({
   principal: v.pipe(v.number(), v.minValue(0)),
   annualRatePercentage: v.pipe(v.number(), v.minValue(0), v.maxValue(100)),
   months: v.pipe(v.number(), v.integer(), v.minValue(1)),
   initialFees: v.pipe(v.number(), v.minValue(0)),
   insuranceCost: v.pipe(v.number(), v.minValue(0)),
 });
-type Input = v.InferOutput<typeof InputSchema>;
 
-type Result = { output: LoanOutput | null };
+const formSchema = v.partial(schema);
+type FormValues = v.InferInput<typeof formSchema>;
 
 const currencyFormatter = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -43,24 +43,17 @@ function formatPercentage(value: number) {
 }
 
 function App() {
-  const [inputs, setInputs] = createStore<Input>({
-    principal: 200_000,
-    annualRatePercentage: 3.5,
-    months: 240,
-    initialFees: 2500,
-    insuranceCost: 10_000,
-  });
-  const [result, setResult] = createStore<Result>({ output: null });
+  const [inputs, setInputs] = createStore<FormValues>({});
+  const validation = () => v.safeParse(schema, inputs);
+  const [result, setResult] = createStore<{ output: LoanOutput | null }>({ output: null });
 
-  const handleSubmit = (event: SubmitEvent) => {
-    event.preventDefault();
-    const validation = v.safeParse(InputSchema, inputs);
-    if (!validation.success) return;
-    const output = computeCost({
-      ...validation.output,
-      annualRate: validation.output.annualRatePercentage / 100,
-    });
-    setResult('output', output);
+  const handleOnClick = () => {
+    const parsed = validation();
+    if (!parsed.success) {
+      setResult({ output: null });
+      return;
+    }
+    setResult({ output: computeCost({ ...parsed.output, annualRate: parsed.output.annualRatePercentage / 100 }) });
   };
 
   return (
