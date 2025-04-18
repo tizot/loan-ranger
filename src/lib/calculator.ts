@@ -11,7 +11,7 @@ interface LoanInput {
   insuranceCost: number;
 }
 
-interface LoanOutput {
+export interface LoanOutput {
   /** The monthly installment excluding insurance costs */
   monthlyInstallmentWithoutInsurance: number;
   /** The monthly installment including all costs (principal, interests, insurance, ...) */
@@ -43,7 +43,11 @@ export function computeCost(inputs: LoanInput): LoanOutput {
   };
 }
 
-function computeInterestCost({ annualRate, months, principal }: { annualRate: number; months: number; principal: number }): {
+function computeInterestCost({
+  annualRate,
+  months,
+  principal,
+}: { annualRate: number; months: number; principal: number }): {
   monthlyInstallmentWithoutInsurance: number;
   totalInterests: number;
 } {
