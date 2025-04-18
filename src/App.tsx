@@ -12,6 +12,7 @@ import {
   NumberFieldLabel,
 } from './components/ui/number-field';
 import { type LoanOutput, computeCost } from './lib/calculator';
+import { useSearchParams } from '@solidjs/router';
 
 const schema = v.object({
   principal: v.pipe(v.number(), v.minValue(0)),
@@ -42,10 +43,36 @@ function formatPercentage(value: number) {
   return percentageFormatter.format(value);
 }
 
+function parseNumber(value: string | string[] | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  if (Array.isArray(value)) return parseNumber(value[0]);
+  const parsed = Number.parseFloat(value.replace(',', '.'));
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
+
+function parseParams(params: Partial<Record<string, string | string[]>>): FormValues {
+  return {
+    principal: parseNumber(params.principal),
+    annualRatePercentage: parseNumber(params.rate),
+    months: parseNumber(params.months),
+    initialFees: parseNumber(params.initial),
+    insuranceCost: parseNumber(params.insurance),
+  };
+}
+
+function validate(inputs: FormValues) {
+  return v.safeParse(schema, inputs);
+}
+function getResult(parsed: ReturnType<typeof validate>): { output: LoanOutput | null } {
+  if (!parsed.success) return { output: null };
+  return { output: computeCost({ ...parsed.output, annualRate: parsed.output.annualRatePercentage / 100 }) };
+}
+
 function App() {
-  const [inputs, setInputs] = createStore<FormValues>({});
+  const [params, setParams] = useSearchParams();
+  const [inputs, setInputs] = createStore<FormValues>(parseParams(params));
   const validation = () => v.safeParse(schema, inputs);
-  const [result, setResult] = createStore<{ output: LoanOutput | null }>({ output: null });
+  const [result, setResult] = createStore<{ output: LoanOutput | null }>(getResult(validation()));
 
   const handleOnClick = () => {
     const parsed = validation();
@@ -53,7 +80,14 @@ function App() {
       setResult({ output: null });
       return;
     }
-    setResult({ output: computeCost({ ...parsed.output, annualRate: parsed.output.annualRatePercentage / 100 }) });
+    setParams({
+      principal: parsed.output.principal.toString(),
+      rate: parsed.output.annualRatePercentage.toString(),
+      months: parsed.output.months.toString(),
+      initial: parsed.output.initialFees.toString(),
+      insurance: parsed.output.insuranceCost.toString(),
+    });
+    setResult(getResult(parsed));
   };
 
   return (

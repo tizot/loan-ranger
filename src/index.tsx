@@ -2,8 +2,16 @@
 import { render } from 'solid-js/web';
 import './index.css';
 import App from './App.tsx';
+import { Route, Router } from '@solidjs/router';
 
 const root = document.getElementById('root');
 
-// biome-ignore lint/style/noNonNullAssertion: <explanation>
-render(() => <App />, root!);
+render(
+  () => (
+    <Router>
+      <Route path="/" component={App} />
+    </Router>
+  ),
+  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  root!,
+);
