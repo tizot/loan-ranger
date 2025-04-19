@@ -108,30 +108,35 @@ function App() {
               <NumberInput
                 rawValue={inputs.principal}
                 onRawValueChange={(value) => setInputs('principal', value)}
+                placeholder="300000"
                 label="Montant emprunté (principal)"
                 errorMessage="Le principal doit être un nombre positif."
               />
               <NumberInput
                 rawValue={inputs.annualRatePercentage}
                 onRawValueChange={(value) => setInputs('annualRatePercentage', value)}
+                placeholder="2,9"
                 label="Taux d'intérêt annuel (%)"
                 errorMessage="Le taux d'intérêt doit être un nombre entre 0 et 100."
               />
               <NumberInput
                 rawValue={inputs.months}
                 onRawValueChange={(value) => setInputs('months', value)}
+                placeholder="300"
                 label="Durée du prêt (mois)"
                 errorMessage="La durée doit être un nombre entier positif."
               />
               <NumberInput
                 rawValue={inputs.initialFees}
                 onRawValueChange={(value) => setInputs('initialFees', value)}
+                placeholder="5000"
                 label="Frais de dossier initiaux"
                 errorMessage="Les frais doivent être un nombre positif."
               />
               <NumberInput
                 rawValue={inputs.insuranceCost}
                 onRawValueChange={(value) => setInputs('insuranceCost', value)}
+                placeholder="12000"
                 label="Coût de l'assurance"
                 errorMessage="Le coût doit être un nombre positif."
               />
@@ -177,14 +182,14 @@ function App() {
   );
 }
 
-type NumberInputProps = NumberFieldRootProps & { label: string; errorMessage: string };
+type NumberInputProps = NumberFieldRootProps & { label: string; errorMessage: string; placeholder?: string };
 const NumberInput = (props: NumberInputProps) => {
-  const [local, rest] = splitProps(props, ['label', 'errorMessage']);
+  const [local, rest] = splitProps(props, ['label', 'errorMessage', 'placeholder']);
   return (
     <NumberField {...rest} class="flex w-full flex-col gap-2">
       <NumberFieldGroup>
         <NumberFieldLabel>{local.label}</NumberFieldLabel>
-        <NumberFieldInput />
+        <NumberFieldInput placeholder={local.placeholder} />
         <NumberFieldErrorMessage>{local.errorMessage}</NumberFieldErrorMessage>
       </NumberFieldGroup>
     </NumberField>
