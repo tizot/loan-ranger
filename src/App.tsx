@@ -1,5 +1,5 @@
 import type { NumberFieldRootProps } from '@kobalte/core/number-field';
-import { Show, splitProps } from 'solid-js';
+import { createEffect, Show, splitProps } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import * as v from 'valibot';
 import { Button } from './components/ui/button';
@@ -85,6 +85,11 @@ function App() {
   const [inputs, setInputs] = createStore<FormValues>(parseParams(params));
   const validation = () => v.safeParse(schema, inputs);
   const [result, setResult] = createStore<{ output: LoanOutput | null }>(getResult(validation()));
+
+  createEffect(() => {
+    const parsed = v.safeParse(schema, parseParams(params));
+    setResult(getResult(parsed));
+  });
 
   const handleOnSubmit = (e: SubmitEvent) => {
     e.preventDefault();
