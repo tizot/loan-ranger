@@ -13,11 +13,13 @@ import {
 } from './components/ui/number-field';
 import { type LoanOutput, computeCost } from './lib/calculator';
 import { useSearchParams } from '@solidjs/router';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 
 const schema = v.object({
   principal: v.pipe(v.number(), v.minValue(0)),
   annualRatePercentage: v.pipe(v.number(), v.minValue(0), v.maxValue(100)),
-  months: v.pipe(v.number(), v.integer(), v.minValue(1)),
+  durationValue: v.pipe(v.number(), v.integer(), v.minValue(1)),
+  durationUnit: v.picklist(['months', 'years']),
   initialFees: v.pipe(v.number(), v.minValue(0)),
   insuranceCost: v.pipe(v.number(), v.minValue(0)),
 });
@@ -49,12 +51,18 @@ function parseNumber(value: string | string[] | undefined): number | undefined {
   const parsed = Number.parseFloat(value.replace(',', '.'));
   return Number.isNaN(parsed) ? undefined : parsed;
 }
+function parseUnit(value: string | string[] | undefined): 'months' | 'years' {
+  if (value === undefined) return 'months';
+  if (Array.isArray(value)) return parseUnit(value[0]);
+  return value === 'years' ? 'years' : 'months';
+}
 
 function parseParams(params: Partial<Record<string, string | string[]>>): FormValues {
   return {
     principal: parseNumber(params.principal),
     annualRatePercentage: parseNumber(params.rate),
-    months: parseNumber(params.months),
+    durationValue: parseNumber(params.duration),
+    durationUnit: parseUnit(params.unit),
     initialFees: parseNumber(params.initial),
     insuranceCost: parseNumber(params.insurance),
   };
@@ -65,7 +73,9 @@ function validate(inputs: FormValues) {
 }
 function getResult(parsed: ReturnType<typeof validate>): { output: LoanOutput | null } {
   if (!parsed.success) return { output: null };
-  return { output: computeCost({ ...parsed.output, annualRate: parsed.output.annualRatePercentage / 100 }) };
+  const months =
+    parsed.output.durationUnit === 'months' ? parsed.output.durationValue : parsed.output.durationValue * 12;
+  return { output: computeCost({ ...parsed.output, annualRate: parsed.output.annualRatePercentage / 100, months }) };
 }
 
 function App() {
@@ -84,7 +94,8 @@ function App() {
     setParams({
       principal: parsed.output.principal.toString(),
       rate: parsed.output.annualRatePercentage.toString(),
-      months: parsed.output.months.toString(),
+      duration: parsed.output.durationValue.toString(),
+      unit: parsed.output.durationUnit,
       initial: parsed.output.initialFees.toString(),
       insurance: parsed.output.insuranceCost.toString(),
     });
@@ -119,13 +130,27 @@ function App() {
                 label="Taux d'intérêt annuel (%)"
                 errorMessage="Le taux d'intérêt doit être un nombre entre 0 et 100."
               />
-              <NumberInput
-                rawValue={inputs.months}
-                onRawValueChange={(value) => setInputs('months', value)}
-                placeholder="300"
-                label="Durée du prêt (mois)"
-                errorMessage="La durée doit être un nombre entier positif."
-              />
+              <div class="flex items-end gap-2">
+                <NumberInput
+                  rawValue={inputs.durationValue}
+                  onRawValueChange={(value) => setInputs('durationValue', value)}
+                  placeholder="300"
+                  label="Durée du prêt"
+                  errorMessage="La durée doit être un nombre entier positif."
+                />
+                <Select
+                  value={inputs.durationUnit}
+                  onChange={(value) => value != null && setInputs('durationUnit', value)}
+                  options={['months', 'years']}
+                  required
+                  itemComponent={(props) => <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>}
+                >
+                  <SelectTrigger aria-label="Duration unit" class="w-28">
+                    <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent />
+                </Select>
+              </div>
               <NumberInput
                 rawValue={inputs.initialFees}
                 onRawValueChange={(value) => setInputs('initialFees', value)}
