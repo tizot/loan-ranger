@@ -12,7 +12,7 @@ import {
   NumberFieldLabel,
 } from './components/ui/number-field';
 import { type LoanOutput, computeLoanOutput } from './lib/calculator';
-import { useSearchParams } from '@solidjs/router';
+import { useNavigate, useSearchParams } from '@solidjs/router';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 
 const schema = v.object({
@@ -85,6 +85,7 @@ function App() {
   const [inputs, setInputs] = createStore<FormValues>(parseParams(params));
   const validation = () => v.safeParse(schema, inputs);
   const [result, setResult] = createStore<{ output: LoanOutput | null }>(getResult(validation()));
+  const navigate = useNavigate();
 
   createEffect(() => {
     const parsed = v.safeParse(schema, parseParams(params));
@@ -174,6 +175,17 @@ function App() {
               />
               <Button type="submit" disabled={!validation().success} class="mt-2">
                 Calculer
+              </Button>
+              <Button
+                type="reset"
+                variant="outline"
+                class="mt-2"
+                onClick={() => {
+                  setResult({ output: null });
+                  navigate('/');
+                }}
+              >
+                Réinitialiser
               </Button>
             </form>
           </CardContent>
