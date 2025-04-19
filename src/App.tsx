@@ -11,7 +11,7 @@ import {
   NumberFieldInput,
   NumberFieldLabel,
 } from './components/ui/number-field';
-import { type LoanOutput, computeCost } from './lib/calculator';
+import { type LoanOutput, computeLoanOutput } from './lib/calculator';
 import { useSearchParams } from '@solidjs/router';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 
@@ -75,7 +75,9 @@ function getResult(parsed: ReturnType<typeof validate>): { output: LoanOutput | 
   if (!parsed.success) return { output: null };
   const months =
     parsed.output.durationUnit === 'months' ? parsed.output.durationValue : parsed.output.durationValue * 12;
-  return { output: computeCost({ ...parsed.output, annualRate: parsed.output.annualRatePercentage / 100, months }) };
+  return {
+    output: computeLoanOutput({ ...parsed.output, annualRate: parsed.output.annualRatePercentage / 100, months }),
+  };
 }
 
 function App() {
