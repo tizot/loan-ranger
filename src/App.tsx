@@ -110,6 +110,12 @@ function App() {
     setResult(getResult(parsed));
   };
 
+  type DurationOption = { value: 'months' | 'years'; label: string };
+  const durationOptions: DurationOption[] = [
+    { value: 'months', label: 'mois' },
+    { value: 'years', label: 'années' },
+  ];
+
   return (
     <div class="w-full p-3 space-y-4 mx-auto">
       <header class="flex flex-col items-center gap-1">
@@ -146,15 +152,17 @@ function App() {
                   label="Durée du prêt"
                   errorMessage="La durée doit être un nombre entier positif."
                 />
-                <Select
-                  value={inputs.durationUnit}
-                  onChange={(value) => value != null && setInputs('durationUnit', value)}
-                  options={['months', 'years']}
+                <Select<DurationOption>
+                  value={durationOptions.find((option) => option.value === inputs.durationUnit)}
+                  optionValue="value"
+                  optionTextValue="label"
+                  onChange={(value) => value != null && setInputs('durationUnit', value.value)}
+                  options={durationOptions}
                   required
-                  itemComponent={(props) => <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>}
+                  itemComponent={(props) => <SelectItem item={props.item}>{props.item.rawValue.label}</SelectItem>}
                 >
                   <SelectTrigger aria-label="Duration unit" class="w-28">
-                    <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
+                    <SelectValue<DurationOption>>{(state) => state.selectedOption().label}</SelectValue>
                   </SelectTrigger>
                   <SelectContent />
                 </Select>
